@@ -12,18 +12,19 @@ public class AppendController {
     @Value("${POD_NAME:unknown-pod}")
     private String podName;
 
-    @Value("${TARGET_URL:}")
+    @Value("${TARGET_URL:http://appender-02.appender.svc.cluster.local/append}")
     private String targetUrl;
 
     private final RestTemplate restTemplate = new RestTemplate();
 
     @PostMapping("/append")
     public String appendString(@RequestBody Input input) {
-        String response = input.getInput() + "I am Java instance " + podName;
+        String response = input.getInput() + " : I am Java instance - " + podName;
         System.out.println("Test message");
         if (!targetUrl.isEmpty()) {
             try {
-                restTemplate.postForEntity(targetUrl, input, String.class);
+                System.out.println(response);
+                restTemplate.postForEntity(targetUrl, response, String.class);
             } catch (Exception e) {
                 // Log the error or handle it as needed
                 System.err.println("Error calling target URL: " + e.getMessage());
