@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Append Message</title>
+<script>
+async function sendMessage(event) {
+    event.preventDefault();
+    const messageInput = document.getElementById('message');
+    const message = messageInput.value;
+    const responseDiv = document.getElementById('response');
+
+    try {
+        const response = await fetch('/append', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ input: message })
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.text(); // Assuming the response is plain text
+        responseDiv.innerText = 'Server Response: ' + result;
+    } catch (error) {
+        responseDiv.innerText = 'Error: ' + error.message;
+    }
+}
+</script>
+<style>
+body {
+    font-family: sans-serif;
+    line-height: 1.6;
+    margin: 20px;
+    background-color: #f4f4f4;
+}
+
+h1 {
+    color: #333;
+}
+
+form {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+}
+
+button {
+    background-color: #5cb85c;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #4cae4c;
+}
+
+#response {
+    margin-top: 20px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    border-radius: 5px;
+}
+
+</style>
+</head>
+<body>
+
+<h1>Send Message to Appender</h1>
+
+<form onsubmit="sendMessage(event)">
+    <label for="message">Message:</label>
+    <input type="text" id="message" name="message">
+    <button type="submit">Send Message</button>
+</form>
+
+<div id="response">
+    <!-- Server response will be displayed here -->
+</div>
+
+</body>
+</html>
