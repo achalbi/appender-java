@@ -10,7 +10,7 @@
   </parent>
   <groupId>com.telemetrix</groupId>
   <artifactId>appender</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>0.0.1</version>
   <name>demo</name>
   <description>Demo project for Spring Boot</description>
   <properties>
@@ -55,7 +55,7 @@
         <configuration>
           <nodeVersion>v20.11.0</nodeVersion>
           <npmVersion>10.2.4</npmVersion>
-          <workingDirectory>${basedir}/src/main/frontend</workingDirectory>
+          <workingDirectory>${basedir}</workingDirectory>
         </configuration>
         <executions>
           <execution>
@@ -66,13 +66,13 @@
             </goals>
           </execution>
             <execution>
-                <id>npm ci</id>
+                <id>npm install</id>
                 <phase>generate-resources</phase>
                 <goals>
                     <goal>npm</goal>
                 </goals>
                 <configuration>
-                    <arguments>ci</arguments>
+                    <arguments>install</arguments>
                 </configuration>
             </execution>
           <execution>
