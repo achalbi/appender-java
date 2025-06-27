@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 @RestController
@@ -25,7 +26,7 @@ public class AppendController {
             try {
                 System.out.println(response);
                 restTemplate.postForEntity(targetUrl, response, String.class);
-            } catch (Exception e) {
+            } catch (RestClientException e) {
                 // Log the error or handle it as needed
                 System.err.println("Error calling target URL: " + e.getMessage());
             }
@@ -34,7 +35,7 @@ public class AppendController {
         return response;
     }
 
-    static class Input {
+    public static class Input {
         private String input;
 
         public String getInput() {
