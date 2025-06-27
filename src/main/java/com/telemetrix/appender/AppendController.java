@@ -9,7 +9,7 @@ import org.springframework.web.client.RestTemplate;
 @RestController
 public class AppendController {
 
-    @Value("${POD_NAME:unknown-pod}")
+    @Value("${POD_NAME:default-java-instance}")
     private String podName;
 
     @Value("${TARGET_URL:http://appender-02.appender.svc.cluster.local/append}")
@@ -19,7 +19,7 @@ public class AppendController {
 
     @PostMapping("/append")
     public String appendString(@RequestBody Input input) {
-        String response = input.getInput() + " : I am Java instance - " + podName;
+        String response = input.getInput() + " : I am Java instance - " + podName + " ; ";
         System.out.println("Test message");
         if (!targetUrl.isEmpty()) {
             try {
