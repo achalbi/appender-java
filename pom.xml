@@ -11,8 +11,8 @@
   <groupId>com.telemetrix</groupId>
   <artifactId>appender</artifactId>
   <version>0.0.1</version>
-  <name>demo</name>
-  <description>Demo project for Spring Boot</description>
+  <name>Appender Java</name>
+  <description>Appender project for Spring Boot</description>
   <properties>
     <java.version>17</java.version>
   </properties>
@@ -49,43 +49,8 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>com.github.eirslett</groupId>
-        <artifactId>frontend-maven-plugin</artifactId>
-        <version>1.15.0</version>
-        <configuration>
-          <nodeVersion>v20.11.0</nodeVersion>
-          <npmVersion>10.2.4</npmVersion>
-          <workingDirectory>${basedir}</workingDirectory>
-        </configuration>
-        <executions>
-          <execution>
-            <id>install node and npm</id>
-            <phase>generate-resources</phase>
-            <goals>
-              <goal>install-node-and-npm</goal>
-            </goals>
-          </execution>
-            <execution>
-                <id>npm install</id>
-                <phase>generate-resources</phase>
-                <goals>
-                    <goal>npm</goal>
-                </goals>
-                <configuration>
-                    <arguments>install</arguments>
-                </configuration>
-            </execution>
-          <execution>
-            <id>npm run build</id>
-            <phase>generate-resources</phase>
-            <goals>
-              <goal>npm</goal>
-            </goals>
-            <configuration>
-              <arguments>run build</arguments>
-            </configuration>
-          </execution>
-        </executions>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -102,7 +67,7 @@
               <outputDirectory>${basedir}/target/classes/static</outputDirectory>
               <resources>
                 <resource>
-                  <directory>src/main/frontend/dist</directory>
+                  <directory>src/main/resources/static</directory>
                   <filtering>false</filtering>
                 </resource>
               </resources>

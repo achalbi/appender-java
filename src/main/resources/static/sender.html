@@ -1,105 +1,79 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Append Message</title>
-<script>
-async function sendMessage(event) {
-    event.preventDefault();
-    const messageInput = document.getElementById('message');
-    const message = messageInput.value;
-    const responseDiv = document.getElementById('response');
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Append Message</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen py-8">
+    <div class="max-w-2xl mx-auto px-4">
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h1 class="text-3xl font-bold text-gray-800 mb-6">Send Message to Appender</h1>
+            
+            <form onsubmit="sendMessage(event)" class="space-y-4">
+                <div>
+                    <label for="message" class="block text-sm font-medium text-gray-700 mb-2">Message:</label>
+                    <input type="text" id="message" name="message" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Enter your message here...">
+                </div>
+                <button type="submit" class="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                    Send Message
+                </button>
+            </form>
+            
+            <div id="response" class="mt-6 p-4 bg-gray-50 rounded-md border border-gray-200 min-h-[60px]">
+                <!-- Server response will be displayed here -->
+            </div>
+        </div>
+    </div>
 
-    try {
-        const response = await fetch('/append', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ input: message })
-        });
+    <script>
+    async function sendMessage(event) {
+        event.preventDefault();
+        const messageInput = document.getElementById('message');
+        const message = messageInput.value;
+        const responseDiv = document.getElementById('response');
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+        if (!message.trim()) {
+            responseDiv.innerHTML = '<p class="text-red-600">Please enter a message.</p>';
+            return;
         }
 
-        const result = await response.text(); // Assuming the response is plain text
-        responseDiv.innerText = 'Server Response: ' + result;
-    } catch (error) {
-        responseDiv.innerText = 'Error: ' + error.message;
+        // Show loading state
+        responseDiv.innerHTML = '<p class="text-blue-600">Sending message...</p>';
+
+        try {
+            const response = await fetch('/append', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ input: message })
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.text();
+            responseDiv.innerHTML = `
+                <div class="text-green-600">
+                    <p class="font-semibold">Success!</p>
+                    <p class="text-sm mt-1">Server Response: ${result}</p>
+                </div>
+            `;
+            
+            // Clear the input
+            messageInput.value = '';
+        } catch (error) {
+            responseDiv.innerHTML = `
+                <div class="text-red-600">
+                    <p class="font-semibold">Error</p>
+                    <p class="text-sm mt-1">${error.message}</p>
+                </div>
+            `;
+        }
     }
-}
-</script>
-<style>
-body {
-    font-family: sans-serif;
-    line-height: 1.6;
-    margin: 20px;
-    background-color: #f4f4f4;
-}
-
-h1 {
-    color: #333;
-}
-
-form {
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    margin-bottom: 20px;
-}
-
-label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
-}
-
-input[type="text"] {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    box-sizing: border-box; /* Include padding and border in the element's total width and height */
-}
-
-button {
-    background-color: #5cb85c;
-    color: white;
-    padding: 10px 15px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-button:hover {
-    background-color: #4cae4c;
-}
-
-#response {
-    margin-top: 20px;
-    padding: 10px;
-    border: 1px solid #ccc;
-    background-color: #fff;
-    border-radius: 5px;
-}
-
-</style>
-</head>
-<body>
-
-<h1>Send Message to Appender</h1>
-
-<form onsubmit="sendMessage(event)">
-    <label for="message">Message:</label>
-    <input type="text" id="message" name="message">
-    <button type="submit">Send Message</button>
-</form>
-
-<div id="response">
-    <!-- Server response will be displayed here -->
-</div>
-
+    </script>
 </body>
 </html>
