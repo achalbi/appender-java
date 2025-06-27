@@ -65,16 +65,16 @@
               <goal>install-node-and-npm</goal>
             </goals>
           </execution>
-          <execution>
-            <id>npm install</id>
-            <phase>generate-resources</phase>
-            <goals>
-              <goal>npm</goal>
-            </goals>
-            <configuration>
-              <arguments>install</arguments>
-            </configuration>
-          </execution>
+            <execution>
+                <id>npm ci</id>
+                <phase>generate-resources</phase>
+                <goals>
+                    <goal>npm</goal>
+                </goals>
+                <configuration>
+                    <arguments>ci</arguments>
+                </configuration>
+            </execution>
           <execution>
             <id>npm run build</id>
             <phase>generate-resources</phase>
@@ -82,7 +82,7 @@
               <goal>npm</goal>
             </goals>
             <configuration>
-              <arguments>run tailwind:build</arguments>
+              <arguments>run build</arguments>
             </configuration>
           </execution>
         </executions>
