@@ -6,59 +6,113 @@
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
     <version>3.2.1</version>
-    <relativePath/> <!-- lookup parent from repository -->
+    <relativePath/>
   </parent>
+  
   <groupId>com.telemetrix</groupId>
   <artifactId>appender</artifactId>
   <version>0.0.1</version>
   <name>Appender Java</name>
-  <description>Appender project for Spring Boot</description>
+  <description>Minimal Spring Boot appender service</description>
+  
   <properties>
-    <java.version>17</java.version>
+    <java.version>21</java.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <!-- JVM optimizations for minimal footprint -->
+    <spring-boot.run.jvmArguments>
+      -XX:+UseContainerSupport 
+      -XX:MaxRAMPercentage=75.0 
+      -XX:+UseG1GC 
+      -XX:+UseStringDeduplication
+      -XX:+ExitOnOutOfMemoryError
+      -XX:+HeapDumpOnOutOfMemoryError
+    </spring-boot.run.jvmArguments>
   </properties>
+  
   <dependencies>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter</artifactId>
-    </dependency>
+    <!-- Core Spring Boot starter -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
     </dependency>
-
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-web</artifactId>
-    </dependency>
+    
+    <!-- Health checks and monitoring -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-json</artifactId>
+      <artifactId>spring-boot-starter-actuator</artifactId>
     </dependency>
+    
+    <!-- Test dependencies (only for test scope) -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-devtools</artifactId>
-      <scope>runtime</scope>
-    </dependency>
- </dependencies>
+  </dependencies>
+
+  <profiles>
+    <!-- Development profile with additional dependencies -->
+    <profile>
+      <id>dev</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <dependencies>
+        <dependency>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-devtools</artifactId>
+          <scope>runtime</scope>
+          <optional>true</optional>
+        </dependency>
+      </dependencies>
+    </profile>
+    
+    <!-- Production profile - minimal dependencies -->
+    <profile>
+      <id>prod</id>
+      <properties>
+        <spring-boot.run.jvmArguments>
+          -XX:+UseContainerSupport 
+          -XX:MaxRAMPercentage=75.0 
+          -XX:+UseG1GC 
+          -XX:+UseStringDeduplication
+          -XX:+ExitOnOutOfMemoryError
+          -XX:+HeapDumpOnOutOfMemoryError
+          -Dspring.profiles.active=prod
+        </spring-boot.run.jvmArguments>
+      </properties>
+    </profile>
+  </profiles>
 
   <build>
     <plugins>
+      <!-- Spring Boot Maven Plugin with minimal configuration -->
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <exclude>
+              <groupId>org.springframework.boot</groupId>
+              <artifactId>spring-boot-devtools</artifactId>
+            </exclude>
+          </excludes>
+          <executable>true</executable>
+          <layers>
+            <enabled>true</enabled>
+          </layers>
+        </configuration>
       </plugin>
+      
+      <!-- Maven Resources Plugin for static files -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-resources-plugin</artifactId>
         <version>3.3.1</version>
         <executions>
           <execution>
-            <id>copy-resources</id>
+            <id>copy-static-resources</id>
             <phase>generate-resources</phase>
             <goals>
               <goal>copy-resources</goal>
@@ -74,6 +128,34 @@
             </configuration>
           </execution>
         </executions>
+      </plugin>
+      
+      <!-- Maven Compiler Plugin with optimizations -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.11.0</version>
+        <configuration>
+          <source>${java.version}</source>
+          <target>${java.version}</target>
+          <compilerArgs>
+            <arg>-parameters</arg>
+          </compilerArgs>
+        </configuration>
+      </plugin>
+      
+      <!-- Maven Surefire Plugin for tests -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.1.2</version>
+        <configuration>
+          <skipTests>false</skipTests>
+          <includes>
+            <include>**/*Test.java</include>
+            <include>**/*Tests.java</include>
+          </includes>
+        </configuration>
       </plugin>
     </plugins>
   </build>
