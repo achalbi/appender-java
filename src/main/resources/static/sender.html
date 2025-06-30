@@ -25,7 +25,7 @@
     <div class="container mx-auto px-4 py-8 max-w-4xl">
         <!-- Header -->
         <div class="text-center mb-8">
-            <h1 class="text-4xl font-bold text-gray-900 mb-2">Telemetrix Appender</h1>
+            <h1 class="text-4xl text-gray-900 mb-2">Telemetrix Appender</h1>
             <p class="text-gray-600">Send data to the appender service</p>
         </div>
 
@@ -68,6 +68,23 @@
                             </svg>
                             Clear
                         </button>
+                        <select id="multiplier" class="ml-2 px-2 py-1 border border-gray-300 rounded-md text-sm">
+                            <option value="1">1x</option>
+                            <option value="5">5x</option>
+                            <option value="10">10x</option>
+                            <option value="50">50x</option>
+                            <option value="100">100x</option>
+                            <option value="250">250x</option>
+                            <option value="500">500x</option>
+                            <option value="1000">1000x</option>
+                            <option value="2000">2000x</option>
+                            <option value="5000">5000x</option>
+                            <option value="10000">10000x</option>
+                            <option value="20000">20000x</option>
+                            <option value="50000">50000x</option>
+                            <option value="100000">100000x</option>
+                            <option value="500000">500000x</option>
+                        </select>
                     </div>
                     
                     <div id="statusIndicator" class="hidden">
@@ -121,6 +138,7 @@
             const responseCard = document.getElementById('responseCard');
             const statusIndicator = document.getElementById('statusIndicator');
             const statusText = document.getElementById('statusText');
+            const multiplier = parseInt(document.getElementById('multiplier').value, 10);
 
             if (!inputText) {
                 showError('Please enter some text to send.');
@@ -132,58 +150,60 @@
             statusText.textContent = 'Sending...';
             statusIndicator.classList.remove('hidden');
 
-            try {
-                const response = await fetch('/append', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ input: inputText })
-                });
+            let successCount = 0;
+            let errorCount = 0;
+            let lastError = null;
+            let lastSuccess = null;
+            const startTime = performance.now();
 
-                const data = await response.json();
-                responseCard.classList.remove('hidden');
+            for (let i = 0; i < multiplier; i++) {
+                try {
+                    const response = await fetch('/append', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ input: inputText })
+                    });
 
-                if (response.ok) {
-                    let content = `<div class="text-success font-medium mb-2">✓ Request successful</div>`;
-                    if (data.message) {
-                        content += `<div class="text-gray-700">${data.message}</div>`;
+                    const data = await response.json();
+                    if (response.ok) {
+                        successCount++;
+                        lastSuccess = data;
+                    } else {
+                        errorCount++;
+                        lastError = data;
                     }
-                    if (data.result) {
-                        content += `<div class="mt-2 p-3 bg-gray-100 rounded border-l-4 border-success">`;
-                        content += `<div class="font-medium text-gray-900 mb-1">Result:</div>`;
-                        content += `<div class="text-gray-700">${data.result}</div>`;
-                        content += `</div>`;
-                    }
-
-                    responseDiv.innerHTML = content;
-                    responseDiv.className = 'p-4 rounded-md border-2 border-success bg-green-50';
-
-                    statusIndicator.className = 'inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800';
-                    statusText.textContent = 'Success';
-                } else {
-                    throw new Error(data.error || 'Request failed');
+                } catch (error) {
+                    errorCount++;
+                    lastError = { error: error.message };
                 }
-            } catch (error) {
-                console.error('Error:', error);
-                responseCard.classList.remove('hidden');
-                
-                let content = `<div class="text-error font-medium mb-2">✗ Request failed</div>`;
-                content += `<div class="text-gray-700 mb-2">${error.message}</div>`;
-                
-                if (error.stack) {
-                    content += `<details class="mt-2">`;
-                    content += `<summary class="cursor-pointer text-sm text-gray-600">Show details</summary>`;
-                    content += `<pre class="text-gray-700 overflow-x-auto mt-2 p-2 bg-gray-100 rounded text-xs">${error.stack}</pre>`;
-                    content += `</details>`;
-                }
-
-                responseDiv.innerHTML = content;
-                responseDiv.className = 'p-4 rounded-md border-2 border-error bg-red-50';
-
-                statusIndicator.className = 'inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800';
-                statusText.textContent = 'Error';
             }
+            const endTime = performance.now();
+            const timeTaken = ((endTime - startTime) / 1000).toFixed(2);
+
+            responseCard.classList.remove('hidden');
+            let content = '';
+            if (successCount > 0) {
+                content += `<div class="text-success font-medium mb-2">✓ ${successCount} request(s) successful</div>`;
+                if (lastSuccess && lastSuccess.message) {
+                    content += `<div class="text-gray-700">Last success message: ${lastSuccess.message}</div>`;
+                }
+            }
+            if (errorCount > 0) {
+                content += `<div class="text-error font-medium mb-2">✗ ${errorCount} request(s) failed</div>`;
+                if (lastError && lastError.error) {
+                    content += `<div class="text-gray-700 mb-2">Last error: ${lastError.error}</div>`;
+                }
+            }
+            content += `<div class='mt-2 text-sm text-gray-500'>Time taken: <span class='font-mono'>${timeTaken} s</span></div>`;
+            responseDiv.innerHTML = content;
+            responseDiv.className = successCount > 0 ? 'p-4 rounded-md border-2 border-success bg-green-50' : 'p-4 rounded-md border-2 border-error bg-red-50';
+
+            statusIndicator.className = successCount > 0 ?
+                'inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800' :
+                'inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800';
+            statusText.textContent = successCount > 0 ? 'Success' : 'Error';
         }
 
         function sendQuickMessage(message) {
