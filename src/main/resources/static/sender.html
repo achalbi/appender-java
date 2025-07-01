@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
@@ -14,19 +15,28 @@
                         secondary: '#1E40AF',
                         success: '#10B981',
                         error: '#EF4444',
-                        warning: '#F59E0B'
+                        warning: '#F59E0B',
+                        lightbg: '#e8e8da'
                     }
                 }
             }
         }
     </script>
 </head>
-<body class="bg-gray-50 min-h-screen">
+<body class="bg-lightbg dark:bg-gray-900 min-h-screen transition-colors duration-300" id="bodyRoot">
+    <!-- Theme Toggle Button in Top Right -->
+    <div class="fixed top-4 right-4 z-50">
+        <button id="themeToggle" onclick="toggleTheme()" class="p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 shadow hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-200 flex items-center justify-center" aria-label="Toggle Dark/Light Mode">
+            <span id="themeIcon">
+                <!-- Icon will be set by JS -->
+            </span>
+        </button>
+    </div>
     <div class="container mx-auto px-4 py-8 max-w-4xl">
         <!-- Header -->
-        <div class="text-center mb-8">
-            <h1 class="text-4xl text-gray-900 mb-2">Telemetrix Appender</h1>
-            <p class="text-gray-600">Send data to the appender service</p>
+        <div class="text-center mb-8 flex flex-col items-center">
+            <h1 class="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2">Telemetrix Appender</h1>
+            <p class="text-gray-600 dark:text-gray-300">Send data to the appender service</p>
         </div>
 
         <!-- Main Form Card -->
@@ -244,6 +254,39 @@
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('inputText').focus();
         });
+
+        // Theme toggle logic
+        function setTheme(dark) {
+            if (dark) {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+                setThemeIcon(true);
+            } else {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+                setThemeIcon(false);
+            }
+        }
+        function toggleTheme() {
+            const isDark = document.documentElement.classList.contains('dark');
+            setTheme(!isDark);
+        }
+        function setThemeIcon(isDark) {
+            const iconSpan = document.getElementById('themeIcon');
+            if (isDark) {
+                // Moon icon
+                iconSpan.innerHTML = `<svg xmlns='http://www.w3.org/2000/svg' class='h-6 w-6' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M21 12.79A9 9 0 1111.21 3a7 7 0 109.79 9.79z' /></svg>`;
+            } else {
+                // Sun icon
+                iconSpan.innerHTML = `<svg xmlns='http://www.w3.org/2000/svg' class='h-6 w-6' fill='none' viewBox='0 0 24 24' stroke='currentColor'><circle cx='12' cy='12' r='5' stroke='currentColor' stroke-width='2' fill='currentColor'/><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42'/></svg>`;
+            }
+        }
+        // On load, set theme from localStorage or system preference
+        (function() {
+            const theme = localStorage.getItem('theme');
+            const isDark = theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            setTheme(isDark);
+        })();
     </script>
 </body>
 </html>
